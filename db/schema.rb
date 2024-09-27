@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_16_171549) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_15_220611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -45,10 +45,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_16_171549) do
   create_table "attachments", force: :cascade do |t|
     t.string "record_type"
     t.bigint "record_id"
-    t.bigint "post_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["post_id"], name: "index_attachments_on_post_id"
     t.index ["record_type", "record_id"], name: "index_attachments_on_record"
   end
 
@@ -61,10 +59,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_16_171549) do
     t.datetime "updated_at", null: false
     t.index ["commentable_type", "commentable_id"], name: "index_comments_on_commentable_type_and_commentable_id"
   end
-
-  create_table "companies", force: :cascade do |t|
+    create_table "companies", force: :cascade do |t|
     t.string "name"
     t.string "cnpj"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "company_domains", force: :cascade do |t|
+    t.integer "company_id", null: false
+    t.integer "domain_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -77,11 +81,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_16_171549) do
   end
 
   create_table "post_users", force: :cascade do |t|
-    t.integer "post_id", null: false
-    t.integer "user_id", null: false
+    t.bigint "post_id", null: false
+    t.bigint "user_id", null: false
     t.boolean "owner_boolean"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["post_id"], name: "index_post_users_on_post_id"
+    t.index ["user_id", "post_id"], name: "index_post_users_on_user_id_and_post_id", unique: true
+    t.index ["user_id"], name: "index_post_users_on_user_id"
   end
 
   create_table "posts", force: :cascade do |t|
@@ -108,5 +115,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_16_171549) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "attachments", "posts"
+  add_foreign_key "post_users", "posts"
+  add_foreign_key "post_users", "users"
 end
